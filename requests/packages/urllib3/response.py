@@ -300,8 +300,7 @@ class HTTPResponse(io.IOBase):
             'content-encoding' header.
         """
         if self.chunked:
-            for line in self.read_chunked(amt, decode_content=decode_content):
-                yield line
+            yield from self.read_chunked(amt, decode_content=decode_content)
         else:
             while not is_fp_closed(self._fp):
                 data = self.read(amt=amt, decode_content=decode_content)
@@ -327,7 +326,7 @@ class HTTPResponse(io.IOBase):
 
         # HTTPResponse objects in Python 3 don't have a .strict attribute
         strict = getattr(r, 'strict', 0)
-        resp = ResponseCls(body=r,
+        return ResponseCls(body=r,
                            headers=headers,
                            status=r.status,
                            version=r.version,
@@ -335,7 +334,6 @@ class HTTPResponse(io.IOBase):
                            strict=strict,
                            original_response=r,
                            **response_kw)
-        return resp
 
     # Backwards-compatibility methods for httplib.HTTPResponse
     def getheaders(self):

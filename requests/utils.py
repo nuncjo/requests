@@ -329,8 +329,7 @@ def stream_decode_response_unicode(iterator, r):
     """Stream decodes a iterator."""
 
     if r.encoding is None:
-        for item in iterator:
-            yield item
+        yield from iterator
         return
 
     decoder = codecs.getincrementaldecoder(r.encoding)(errors='replace')
@@ -405,10 +404,7 @@ def unquote_unreserved(uri):
             except ValueError:
                 raise InvalidURL("Invalid percent-escape sequence: '%s'" % h)
 
-            if c in UNRESERVED_SET:
-                parts[i] = c + parts[i][2:]
-            else:
-                parts[i] = '%' + parts[i]
+            parts[i] = c + parts[i][2:] if c in UNRESERVED_SET else '%' + parts[i]
         else:
             parts[i] = '%' + parts[i]
     return ''.join(parts)
@@ -503,9 +499,10 @@ def should_bypass_proxies(url):
         ip = netloc.split(':')[0]
         if is_ipv4_address(ip):
             for proxy_ip in no_proxy:
-                if is_valid_cidr(proxy_ip):
-                    if address_in_network(ip, proxy_ip):
-                        return True
+                if is_valid_cidr(proxy_ip) and address_in_network(
+                    ip, proxy_ip
+                ):
+                    return True
         else:
             for host in no_proxy:
                 if netloc.endswith(host) or netloc.split(':')[0].endswith(host):
@@ -524,10 +521,7 @@ def should_bypass_proxies(url):
     except (TypeError, socket.gaierror):
         bypass = False
 
-    if bypass:
-        return True
-
-    return False
+    return bypass
 
 def get_environ_proxies(url):
     """Return a dict of environment proxies."""
@@ -594,9 +588,7 @@ def parse_header_links(value):
         except ValueError:
             url, params = val, ''
 
-        link = {}
-
-        link["url"] = url.strip("<> '\"")
+        link = {"url": url.strip("<> '\"")}
 
         for param in params.split(";"):
             try:
@@ -684,11 +676,7 @@ def to_native_string(string, encoding='ascii'):
     if isinstance(string, builtin_str):
         out = string
     else:
-        if is_py2:
-            out = string.encode(encoding)
-        else:
-            out = string.decode(encoding)
-
+        out = string.encode(encoding) if is_py2 else string.decode(encoding)
     return out
 
 

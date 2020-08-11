@@ -143,10 +143,12 @@ def remove_cookie_by_name(cookiejar, name, domain=None, path=None):
     """
     clearables = []
     for cookie in cookiejar:
-        if cookie.name == name:
-            if domain is None or domain == cookie.domain:
-                if path is None or path == cookie.path:
-                    clearables.append((cookie.domain, cookie.path, cookie.name))
+        if (
+            cookie.name == name
+            and (domain is None or domain == cookie.domain)
+            and (path is None or path == cookie.path)
+        ):
+            clearables.append((cookie.domain, cookie.path, cookie.name))
 
     for domain, path, name in clearables:
         cookiejar.clear(domain, path, name)
@@ -314,10 +316,12 @@ class RequestsCookieJar(cookielib.CookieJar, collections.MutableMapping):
         _find_no_duplicates if you want an exception thrown if there are
         conflicting cookies."""
         for cookie in iter(self):
-            if cookie.name == name:
-                if domain is None or cookie.domain == domain:
-                    if path is None or cookie.path == path:
-                        return cookie.value
+            if (
+                cookie.name == name
+                and (domain is None or cookie.domain == domain)
+                and (path is None or cookie.path == path)
+            ):
+                return cookie.value
 
         raise KeyError('name=%r, domain=%r, path=%r' % (name, domain, path))
 
@@ -329,12 +333,14 @@ class RequestsCookieJar(cookielib.CookieJar, collections.MutableMapping):
         and optionally domain and path."""
         toReturn = None
         for cookie in iter(self):
-            if cookie.name == name:
-                if domain is None or cookie.domain == domain:
-                    if path is None or cookie.path == path:
-                        if toReturn is not None:  # if there are multiple cookies that meet passed in criteria
-                            raise CookieConflictError('There are multiple cookies with name, %r' % (name))
-                        toReturn = cookie.value  # we will eventually return this as long as no cookie conflict
+            if (
+                cookie.name == name
+                and (domain is None or cookie.domain == domain)
+                and (path is None or cookie.path == path)
+            ):
+                if toReturn is not None:  # if there are multiple cookies that meet passed in criteria
+                    raise CookieConflictError('There are multiple cookies with name, %r' % (name))
+                toReturn = cookie.value  # we will eventually return this as long as no cookie conflict
 
         if toReturn:
             return toReturn

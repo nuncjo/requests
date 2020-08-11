@@ -67,7 +67,7 @@ def merge_setting(request_setting, session_setting, dict_class=OrderedDict):
         if v is None:
             del merged_setting[k]
 
-    merged_setting = dict((k, v) for (k, v) in merged_setting.items() if v is not None)
+    merged_setting = {k: v for (k, v) in merged_setting.items() if v is not None}
 
     return merged_setting
 
@@ -462,9 +462,7 @@ class Session(SessionRedirectMixin):
             'allow_redirects': allow_redirects,
         }
         send_kwargs.update(settings)
-        resp = self.send(prep, **send_kwargs)
-
-        return resp
+        return self.send(prep, **send_kwargs)
 
     def get(self, url, **kwargs):
         """Sends a GET request. Returns :class:`Response` object.
@@ -657,7 +655,7 @@ class Session(SessionRedirectMixin):
             self.adapters[key] = self.adapters.pop(key)
 
     def __getstate__(self):
-        state = dict((attr, getattr(self, attr, None)) for attr in self.__attrs__)
+        state = {attr: getattr(self, attr, None) for attr in self.__attrs__}
         state['redirect_cache'] = dict(self.redirect_cache)
         return state
 

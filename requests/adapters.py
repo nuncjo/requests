@@ -98,8 +98,8 @@ class HTTPAdapter(BaseAdapter):
         self.init_poolmanager(pool_connections, pool_maxsize, block=pool_block)
 
     def __getstate__(self):
-        return dict((attr, getattr(self, attr, None)) for attr in
-                    self.__attrs__)
+        return {attr: getattr(self, attr, None) for attr in
+                        self.__attrs__}
 
     def __setstate__(self, state):
         # Can't handle by adding 'proxy_manager' to self.__attrs__ because
@@ -144,7 +144,7 @@ class HTTPAdapter(BaseAdapter):
         :param proxy_kwargs: Extra keyword arguments used to configure the Proxy Manager.
         :returns: ProxyManager
         """
-        if not proxy in self.proxy_manager:
+        if proxy not in self.proxy_manager:
             proxy_headers = self.proxy_headers(proxy)
             self.proxy_manager[proxy] = proxy_from_url(
                 proxy,
@@ -340,7 +340,7 @@ class HTTPAdapter(BaseAdapter):
         url = self.request_url(request, proxies)
         self.add_headers(request)
 
-        chunked = not (request.body is None or 'Content-Length' in request.headers)
+        chunked = request.body is not None and 'Content-Length' not in request.headers
 
         if isinstance(timeout, tuple):
             try:
